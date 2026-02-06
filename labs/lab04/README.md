@@ -552,11 +552,9 @@ if __name__ == "__main__":
 
 2. **Cleanup function:** Write a `cleanup()` function that tears down all resources in reverse order.
 
-3. **Config validation:** Add checks to ensure required keys exist in `config.yaml`.
+3. **Config validation:** Add checks to ensure required keys exist in `config.yaml`, or constrains choices such as instance types.
 
 4. **Better error recovery:** Implement retry logic with exponential backoff for transient failures.
-
-5. **Upload to S3:** Have your user data script create a file and upload it to the S3 bucket as proof of successful permissions to the bucket.
 
 ---
 
