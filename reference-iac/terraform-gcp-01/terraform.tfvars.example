@@ -1,0 +1,13 @@
+# Copy this file to terraform.tfvars and fill in your values
+# terraform.tfvars is loaded automatically by Terraform
+
+project_id    = "your-gcp-project-id"
+region        = "us-central1"
+zone          = "us-central1-a"
+instance_name = "my-instance"
+machine_type  = "e2-micro"
+bucket_name   = "your-globally-unique-bucket-name"
+
+# Restrict these to your IP in production
+allowed_ssh_cidrs  = ["0.0.0.0/0"]
+allowed_http_cidrs = ["0.0.0.0/0"]

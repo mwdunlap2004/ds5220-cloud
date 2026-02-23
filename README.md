@@ -12,6 +12,7 @@ An intensive overview of cloud infrastructure and their role in data science. To
 - [**Working with SQS**](reference-iac/sqs/)
 - [**Working with CloudFormation**](reference-iac/cloudformation/)
 - [**Custom Jupyter Instance**](reference-iac/cloudformation/jupyter-stack/README.md)
+- [**Terraform**](reference-iac/terraform-aws-01/)
 
 
 ## Labs
