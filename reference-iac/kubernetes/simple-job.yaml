@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: papermill-job-2
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+      - name: papermill-container
+        image: ghcr.io/uvasds-systems/papermill-jobs:1.3
+        resources:  
+          limits:   
+            cpu: "1.0"
+            memory: 1024Mi
+          requests: 
+            cpu: "1"
+            memory: 1024Mi
+        env:
+        - name: NOTEBOOK_URL
+          value: "https://raw.githubusercontent.com/uvasds-systems/jupyter-jobs/refs/heads/main/earthquakes.ipynb"
+        - name: START
+          value: "2024-01-01"
+        - name: END
+          value: "2024-12-31"
+      restartPolicy: Never
+  ttlSecondsAfterFinished: 86400

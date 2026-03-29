@@ -1,0 +1,83 @@
+##
+## ConfigMap — Redpanda Console configuration pointing at our Kafka brokers
+##
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redpanda-console-config
+  namespace: kafka
+data:
+  config.yaml: |
+    kafka:
+      brokers:
+        - kafka-0.kafka-headless.kafka.svc.cluster.local:9092
+        - kafka-1.kafka-headless.kafka.svc.cluster.local:9092
+        - kafka-2.kafka-headless.kafka.svc.cluster.local:9092
+---
+##
+## Deployment — a single replica of the Redpanda Console web UI
+##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redpanda-console
+  namespace: kafka
+  labels:
+    app: redpanda-console
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redpanda-console
+  template:
+    metadata:
+      labels:
+        app: redpanda-console
+    spec:
+      containers:
+        - name: console
+          image: redpandadata/console:v2.7.2
+          ports:
+            - containerPort: 8080
+          env:
+            - name: CONFIG_FILEPATH
+              value: /etc/console/config.yaml
+          volumeMounts:
+            - name: config
+              mountPath: /etc/console
+              readOnly: true
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: config
+          configMap:
+            name: redpanda-console-config
+---
+##
+## Service — ClusterIP service for the console (used with port-forward)
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda-console
+  namespace: kafka
+  labels:
+    app: redpanda-console
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: redpanda-console
