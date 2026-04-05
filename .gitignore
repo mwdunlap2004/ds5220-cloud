@@ -1,7 +1,7 @@
 *scrap*
 Pipfile*
 *Pipfile*
-dp*
 *.terraform*
 *.tfstate
 *.backup
+storage
