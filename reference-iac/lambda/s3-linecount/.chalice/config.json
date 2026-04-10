@@ -1,0 +1,14 @@
+{
+  "version": "2.0",
+  "app_name": "s3-linecount",
+  "stages": {
+    "dev": {
+      "api_gateway_stage": "api",
+      "autogen_policy": false,
+      "environment_variables": {
+        "BUCKET_NAME": "s3-linecount"
+      }
+    }
+  },
+  "iam_policy_file": "iam-policy.json"
+}

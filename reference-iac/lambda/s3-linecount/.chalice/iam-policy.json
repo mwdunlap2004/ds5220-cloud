@@ -1,0 +1,30 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3GetOnS3LinecountBucket",
+      "Effect": "Allow",
+      "Action": "s3:Get*",
+      "Resource": [
+        "arn:aws:s3:::s3-linecount",
+        "arn:aws:s3:::s3-linecount/*"
+      ]
+    },
+    {
+      "Sid": "DynamoDBPutOnS3LinecountTable",
+      "Effect": "Allow",
+      "Action": "dynamodb:PutItem",
+      "Resource": "arn:aws:dynamodb:*:*:table/s3-linecount"
+    },
+    {
+      "Sid": "CloudWatchLogsForLambda",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    }
+  ]
+}
