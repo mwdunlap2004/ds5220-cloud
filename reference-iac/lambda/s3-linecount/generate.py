@@ -33,7 +33,7 @@ def generate_filename():
 
 def generate_csv(filename):
     """Write a CSV with a random number of lines (400-1700) of random words."""
-    num_lines = random.randint(400, 1700)
+    num_lines = random.randint(500, 5000)
     with open(filename, "w") as f:
         f.write("col1,col2,col3,col4,col5\n")
         for _ in range(num_lines):

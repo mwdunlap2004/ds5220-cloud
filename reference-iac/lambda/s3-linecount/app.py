@@ -14,8 +14,6 @@ table = ddb.Table('s3-linecount')
 
 @app.on_s3_event(bucket=S3_BUCKET, events=['s3:ObjectCreated:*'])
 def s3_handler(event):
-    app.log.debug("Received event for bucket: %s, key: %s",
-                  event.bucket, event.key)
 
     response = s3.get_object(Bucket=event.bucket, Key=event.key)
     body = response['Body'].read().decode('utf-8')
@@ -28,5 +26,5 @@ def s3_handler(event):
         }
     )
 
-    app.log.debug("Wrote %d lines for %s to s3-linecount table",
-                  line_count, event.key)
+    app.log.debug("Received event for bucket: %s, key: %s", event.bucket, event.key)
+    app.log.debug("Wrote %d lines for %s to s3-linecount table", line_count, event.key)
