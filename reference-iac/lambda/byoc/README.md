@@ -147,11 +147,11 @@ aws lambda update-function-code \
   --image-uri 440848399208.dkr.ecr.us-east-1.amazonaws.com/my-lambda-fn:latest
 ```
 
-## Deploy Using CloudFormation
+## Deploy and Tear Down Using CloudFormation
 
 Assume you have a container image built and pushed to ECR, and that you know the IAM policy statements you would like for your BYOC Lambda function. You can create the policy, role, and Lambda function itself using CloudFormation.
 
-See `template.yaml` for sample code.
+See [`template.yaml`](template.yaml) for sample code.
 
 To deploy this template from the CLI:
 ```
