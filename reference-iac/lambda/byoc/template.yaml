@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Container-based Lambda function that lists S3 buckets
+
+Parameters:
+  ImageUri:
+    Type: String
+    Default: 440848399208.dkr.ecr.us-east-1.amazonaws.com/my-lambda-fn:latest
+    Description: ECR image URI for the Lambda function
+  SourceBucketName:
+    Type: String
+    Description: Name for the new S3 bucket to create. Must be globally unique. New objects in this bucket will trigger the Lambda.
+
+Resources:
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: byoc-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub arn:aws:s3:::${SourceBucketName}/*
+              - Effect: Allow
+                Action:
+                  - s3:ListAllMyBuckets
+                Resource: arn:aws:s3:::*
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: byoc-s3-list
+      PackageType: Image
+      Code:
+        ImageUri: !Ref ImageUri
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Architectures:
+        - x86_64
+
+  S3InvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub arn:aws:s3:::${SourceBucketName}
+
+  SourceBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: S3InvokePermission
+    Properties:
+      BucketName: !Ref SourceBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Function: !GetAtt LambdaFunction.Arn
+
+Outputs:
+  FunctionName:
+    Value: !Ref LambdaFunction
+  FunctionArn:
+    Value: !GetAtt LambdaFunction.Arn
+  RoleArn:
+    Value: !GetAtt LambdaExecutionRole.Arn
+  SourceBucketName:
+    Value: !Ref SourceBucket

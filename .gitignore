@@ -1,3 +1,4 @@
+dp*
 *scrap*
 Pipfile*
 *Pipfile*
@@ -5,3 +6,4 @@ Pipfile*
 *.tfstate
 *.backup
 storage
+**tfstate*

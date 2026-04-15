@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
-# Install the Lambda Runtime Interface Client
-RUN pip install awslambdaric
+COPY requirements.txt /app/
+RUN pip install -r /app/requirements.txt
 
 COPY app.py /app/
 WORKDIR /app

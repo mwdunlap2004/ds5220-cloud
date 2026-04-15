@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template to create an SQS Queue with a custom name and return its ARN and URL.'
+
+Parameters:
+  MyQueueName:
+    Type: String
+    Description: Enter the desired name for your SQS Queue
+    Default: MyQueue
+
+Resources:
+  MySqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref MyQueueName
+
+Outputs:
+  QueueURL:
+    Description: The URL of the newly created SQS queue
+    Value: !Ref MySqsQueue
+    Export:
+      Name: !Sub "${AWS::StackName}-QueueURL"
+
+  QueueARN:
+    Description: The ARN of the newly created SQS queue
+    Value: !GetAtt MySqsQueue.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-QueueARN"
