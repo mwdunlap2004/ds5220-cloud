@@ -1,0 +1,38 @@
+{
+  "resources": [
+    {
+      "name": "turn_on_role",
+      "resource_type": "iam_role",
+      "role_arn": "arn:aws:iam::440848399208:role/ec2-timer-dev-turn_on",
+      "role_name": "ec2-timer-dev-turn_on"
+    },
+    {
+      "name": "turn_on",
+      "resource_type": "lambda_function",
+      "lambda_arn": "arn:aws:lambda:us-east-1:440848399208:function:ec2-timer-dev-turn_on"
+    },
+    {
+      "name": "turn_on-event",
+      "resource_type": "cloudwatch_event",
+      "rule_name": "ec2-timer-dev-turn_on-event"
+    },
+    {
+      "name": "turn_off_role",
+      "resource_type": "iam_role",
+      "role_arn": "arn:aws:iam::440848399208:role/ec2-timer-dev-turn_off",
+      "role_name": "ec2-timer-dev-turn_off"
+    },
+    {
+      "name": "turn_off",
+      "resource_type": "lambda_function",
+      "lambda_arn": "arn:aws:lambda:us-east-1:440848399208:function:ec2-timer-dev-turn_off"
+    },
+    {
+      "name": "turn_off-event",
+      "resource_type": "cloudwatch_event",
+      "rule_name": "ec2-timer-dev-turn_off-event"
+    }
+  ],
+  "schema_version": "2.0",
+  "backend": "api"
+}

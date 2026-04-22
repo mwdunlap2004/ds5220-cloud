@@ -1,0 +1,23 @@
+{
+  "resources": [
+    {
+      "name": "api_handler_role",
+      "resource_type": "iam_role",
+      "role_arn": "arn:aws:iam::440848399208:role/discord-bot-api-dev-api_handler",
+      "role_name": "discord-bot-api-dev-api_handler"
+    },
+    {
+      "name": "api_handler",
+      "resource_type": "lambda_function",
+      "lambda_arn": "arn:aws:lambda:us-east-1:440848399208:function:discord-bot-api-dev"
+    },
+    {
+      "name": "rest_api",
+      "resource_type": "rest_api",
+      "rest_api_id": "x5gjqnvpo8",
+      "rest_api_url": "https://x5gjqnvpo8.execute-api.us-east-1.amazonaws.com/api/"
+    }
+  ],
+  "schema_version": "2.0",
+  "backend": "api"
+}
