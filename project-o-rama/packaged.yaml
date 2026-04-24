@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Weather Alert Subscription Service
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+    Runtime: python3.9
+    Environment:
+      Variables:
+        TABLE_NAME:
+          Ref: WeatherSubscriptionsTableFull
+  Api:
+    Cors:
+      AllowMethods: "'POST,GET,OPTIONS,DELETE'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+Resources:
+  WeatherSubscriptionsTableFull:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: WeatherSubscriptions
+      AttributeDefinitions:
+      - AttributeName: city
+        AttributeType: S
+      - AttributeName: email
+        AttributeType: S
+      KeySchema:
+      - AttributeName: city
+        KeyType: HASH
+      - AttributeName: email
+        KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+  SubscribeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://project-o-rama-deploy-1777048002/fcb37aead80d4c1038c17074d18492be
+      Handler: index.handler
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: WeatherSubscriptionsTableFull
+      - Statement:
+        - Effect: Allow
+          Action:
+          - sns:CreateTopic
+          - sns:Subscribe
+          Resource: '*'
+      Events:
+        SubscribeApi:
+          Type: Api
+          Properties:
+            Path: /subscribe
+            Method: post
+  UnsubscribeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://project-o-rama-deploy-1777048002/e18a6e0f3b6f2f062fa3acca52fd5ad0
+      Handler: index.handler
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: WeatherSubscriptionsTableFull
+      - Statement:
+        - Effect: Allow
+          Action:
+          - sns:Unsubscribe
+          - sns:ListSubscriptionsByTopic
+          Resource: '*'
+      Events:
+        UnsubscribeApi:
+          Type: Api
+          Properties:
+            Path: /unsubscribe
+            Method: post
+  WeatherCheckerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://project-o-rama-deploy-1777048002/626282928aa21c738c5d9f6b6f821496
+      Handler: index.handler
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: WeatherSubscriptionsTableFull
+      - Statement:
+        - Effect: Allow
+          Action:
+          - sns:Publish
+          Resource: '*'
+      Events:
+        CheckSchedule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 hour)
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
