@@ -6,6 +6,8 @@ import discord
 from discord.ext import commands
 
 TOKEN = os.getenv("DISCORD_TOKEN")
+GUILD_ID = "1458485887896649759"
+ddb = boto3.resource('dynamodb', region_name='us-east-1')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -14,7 +16,12 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=inten
 REGISTER_URL = "https://x5gjqnvpo8.execute-api.us-east-1.amazonaws.com/api/register"
 
 async def setup_hook() -> None:  # This function is automatically called before the bot starts
-    await bot.tree.sync()   # This function is used to sync the slash commands with Discord it is mandatory if you want to use slash commands
+    if GUILD_ID:
+        guild = discord.Object(id=int(GUILD_ID))
+        bot.tree.copy_global_to(guild=guild)
+        await bot.tree.sync(guild=guild)  # Guild-scoped sync is instant — good for dev iteration.
+    else:
+        await bot.tree.sync()  # Global sync — can take up to 1 hour to propagate.
 
 bot.setup_hook = setup_hook  # Not the best way to sync slash commands, but it will have to do for now. A better way is to create a command that calls the sync function.
 
@@ -22,10 +29,12 @@ bot.setup_hook = setup_hook  # Not the best way to sync slash commands, but it w
 async def on_ready() -> None:  # This event is called when the bot is ready
     print(f"Logged in as {bot.user}")
 
+# ping the bot
 @bot.tree.command()
 async def ping(inter: discord.Interaction) -> None:
     await inter.response.send_message(f"> Pong! {round(bot.latency * 1000)}ms")
 
+# allow users to register their projects
 @bot.tree.command(name="register", description="Add your project to this bot. Send as PROJECT-ID, USERNAME, and URL.")
 async def register(inter: discord.Interaction, project_id: str, username: str, url: str) -> None:
     project_id = project_id.strip()
@@ -45,20 +54,48 @@ async def register(inter: discord.Interaction, project_id: str, username: str, u
 
     await inter.response.defer()
     try:
-        ddb = boto3.resource('dynamodb')
         table = ddb.Table('cloud-bots')
         table.put_item(Item={'botname': project_id, 'user': username, 'boturl': url})
         await inter.followup.send(f"Project **{project_id}** registered successfully for `{username}`.")
     except Exception as e:
         await inter.followup.send(f"Error registering project: {e}")
 
-@bot.tree.command(description="Get the methods for a project by PROJECT-ID.")
-async def projects(inter: discord.Interaction, project_id: str) -> None:
+# list all projects
+@bot.tree.command(name="list", description="Get a list of student projects from this bot.")
+async def list_projects(inter: discord.Interaction) -> None:
+    await inter.response.defer()
+    try:
+        table = ddb.Table('cloud-bots')
+        response = table.scan()
+    except Exception as e:
+        await inter.followup.send(f"Error fetching projects: {e}")
+        return
+
+    projects_list = sorted(response.get('Items', []), key=lambda p: p['botname'].lower())
+    if not projects_list:
+        await inter.followup.send("No projects registered yet. Use `/register` to add one.")
+        return
+
+    header = "Please select a student to get the sub-commands for.\nThen call a project and view its resources with `/project <project-id>`.\n\n"
+    lines = [f"**{p['botname']}** (Owner: {p['user']})" for p in projects_list]
+
+    chunk, first = header, True
+    for line in lines:
+        if len(chunk) + len(line) + 1 > 1900:
+            await inter.followup.send(chunk)
+            chunk = ""
+        chunk += line + "\n"
+    if chunk.strip():
+        await inter.followup.send(chunk)
+
+# get the resources for a project
+@bot.tree.command(description="Get the resources for a project by PROJECT-ID, or call a specific resource.")
+async def project(inter: discord.Interaction, project_id: str, resource: str = None) -> None:
     project_id = project_id.strip()
+    resource = resource.strip() if resource else None
     await inter.response.defer()
 
     try:
-        ddb = boto3.resource('dynamodb')
         table = ddb.Table('cloud-bots')
         response = table.get_item(Key={'botname': project_id})
     except Exception as e:
@@ -76,27 +113,42 @@ async def projects(inter: discord.Interaction, project_id: str) -> None:
         await inter.followup.send(f"Project `{project_id}` has no `boturl` configured.")
         return
 
+    if resource:
+        target_url = f"{boturl.rstrip('/')}/{resource}"
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                http_response = await client.get(target_url)
+                http_response.raise_for_status()
+                try:
+                    payload = http_response.json()
+                    body = payload.get('response', payload) if isinstance(payload, dict) else payload
+                except Exception:
+                    body = http_response.text
+        except Exception as e:
+            await inter.followup.send(f"Error calling `{target_url}`: {e}")
+            return
+
+        await inter.followup.send(f"{body}")
+        return
+
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             http_response = await client.get(boturl)
             http_response.raise_for_status()
             data = http_response.json()
     except Exception as e:
-        await inter.followup.send(f"Error fetching methods from `{boturl}`: {e}")
+        await inter.followup.send(f"Error fetching resources from `{boturl}`: {e}")
         return
 
-    methods = data.get('methods', [])
-    if not methods or len(methods) < 2:
-        await inter.followup.send(f"Expected more than 1 method from `{boturl}`, got {len(methods)}.")
+    about = (data.get('about') or '').strip()
+    resources = data.get('resources', [])
+    if not resources or len(resources) < 2:
+        await inter.followup.send(f"Expected more than 1 resource from `{boturl}`, got {len(resources)}.")
         return
 
-    methods_response = "\n".join(f"- {m}" for m in methods)
+    resources_response = "\n".join(f"- {r}" for r in resources)
     await inter.followup.send(
-        f"**{project_id}** (Owner: {user})\nAvailable methods:\n{methods_response}"
+        f"**{project_id}** (Owner: {user})\n**About:** {about}\n\n**API**: `{boturl}` > [Link]({boturl})\n\n**Available resources:**\n{resources_response}"
     )
-
-@bot.command(name="projects")
-async def projects_prefix(ctx: commands.Context, *, name: str = "nem2p") -> None:
-    await ctx.send("Output for the nem2p project.")
 
 bot.run(TOKEN)

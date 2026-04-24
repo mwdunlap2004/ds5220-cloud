@@ -7,7 +7,19 @@ app = Chalice(app_name='discord-bot-api')
 
 @app.route('/')
 def index():
-    return {"methods": ["weather", "jokes", "ezra"]}
+    return {"about":"This project analyzes how much Ezra Klein speaks in relation to his guests.", "resources": ["graphic", "data", "ezra", "photo"]}
+
+@app.route('/ezra')
+def ezra():
+    return {"response": "Ezra Klein talks a lot."}
+
+@app.route('/graphic')
+def graphic():
+    return {"response": "https://s3.amazonaws.com/uvasds-systems/ds5220/dp3/ezra_klein_speaking.png"}
+
+@app.route('/photo')
+def ezra_graphic():
+    return {"response": "https://cdn.britannica.com/61/275261-050-41011B75/ezra-klein-at-chicago-humanities-festival-2025.jpg"}
 
 @app.route('/bot/{name}')
 def hello_bot(name):
