@@ -38,7 +38,7 @@ async def ping(inter: discord.Interaction) -> None:
 @bot.tree.command(name="instructions", description="Get the link to the project instructions.")
 async def instructions(inter: discord.Interaction) -> None:
     await inter.response.send_message(
-        '{"response": "https://github.com/uvasds-systems/ds5220-cloud/blob/main/dp3/README.md"}'
+        "https://github.com/uvasds-systems/ds5220-cloud/blob/main/dp3/README.md"
     )
 
 # allow users to register their projects
