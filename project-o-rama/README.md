@@ -12,6 +12,8 @@ All projects use **AWS** as the cloud provider. You'll need your course AWS acco
 - [Weather Alerts](#project-4--weather-alert-subscription-service)
 - [MCP Server](#project-5--mcp-server-on-lambda)
 
+[**Let Others Know Which You Chose**](https://www.surveymonkey.com/r/HHS95DS) with this survey.
+
 ---
 
 ## Project 1 — URL Shortener

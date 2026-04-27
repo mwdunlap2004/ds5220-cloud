@@ -34,6 +34,13 @@ async def on_ready() -> None:  # This event is called when the bot is ready
 async def ping(inter: discord.Interaction) -> None:
     await inter.response.send_message(f"> Pong! {round(bot.latency * 1000)}ms")
 
+# return static instructions link
+@bot.tree.command(name="instructions", description="Get the link to the project instructions.")
+async def instructions(inter: discord.Interaction) -> None:
+    await inter.response.send_message(
+        "https://github.com/uvasds-systems/ds5220-cloud/blob/main/dp3/README.md"
+    )
+
 # allow users to register their projects
 @bot.tree.command(name="register", description="Add your project to this bot. Send as PROJECT-ID, USERNAME, and URL.")
 async def register(inter: discord.Interaction, project_id: str, username: str, url: str) -> None:
