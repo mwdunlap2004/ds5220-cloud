@@ -3,3 +3,4 @@
 *.tfstate.*
 crash.log
 terraform.tfvars
+dp3/infra/terraform/terraform.tfvars.example
