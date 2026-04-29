@@ -1,0 +1,36 @@
+firms:
+  source_priority:
+    - VIIRS_SNPP_NRT
+    - VIIRS_NOAA20_NRT
+    - VIIRS_NOAA21_NRT
+  area: world
+  day_range: 1
+  min_confidence: 70
+  daytime_only: true
+  retries: 3
+  backoff_seconds: 1.5
+
+gibs:
+  layer: VIIRS_SNPP_CorrectedReflectance_TrueColor
+  image_format: image/jpeg
+  output_width: 224
+  output_height: 224
+  half_size_m: 1250
+
+sampling:
+  split_ratios:
+    train: 0.70
+    valid: 0.15
+    test: 0.15
+  negative_strategy:
+    - spatial_buffer
+    - temporal_displacement
+    - hotspot_exclusion
+
+quality:
+  min_non_black_ratio: 0.02
+
+output:
+  data_root: data
+  filename_mode: coords_datetime
+  manifest_path: data/manifests/latest_manifest.jsonl
