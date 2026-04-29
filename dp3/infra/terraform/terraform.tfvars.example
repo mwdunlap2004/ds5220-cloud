@@ -1,7 +1,7 @@
 aws_region          = "us-east-1"
 name                = "dp3-wildfire"
 schedule_expression = "rate(1 hour)"
-firms_map_key       = "7ec13be5e7aefaee4708a1559378ee3c"
+
 
 ttl_days       = 90
 day_range      = 1

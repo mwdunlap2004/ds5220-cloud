@@ -8,7 +8,8 @@
       "environment_variables": {
         "DDB_TABLE_NAME": "dp3-wildfire-firms",
         "PLOT_BUCKET": "dp3-wildfire-plot-upw4ys",
-        "PLOT_KEY": "latest/wildfire_latest.png"
+        "PLOT_KEY": "latest/wildfire_latest.png",
+        "MAP_PLOT_KEY": "latest/wildfire_map_latest.png"
       }
     }
   }
