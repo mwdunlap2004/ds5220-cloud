@@ -142,6 +142,7 @@ resource "aws_lambda_function" "ingest" {
       DDB_TABLE_NAME = aws_dynamodb_table.wildfire.name
       PLOT_BUCKET    = aws_s3_bucket.plot.bucket
       PLOT_KEY       = var.plot_key
+      MAP_PLOT_KEY   = "latest/wildfire_map_latest.png"
       TTL_DAYS       = tostring(var.ttl_days)
       DAY_RANGE      = tostring(var.day_range)
       MIN_CONFIDENCE = tostring(var.min_confidence)
